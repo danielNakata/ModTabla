@@ -40,11 +40,11 @@ import org.apache.poi.ss.usermodel.Workbook;
  */
 public class Exportador {
 
-    private static String CVSEXT = ".cvs";
+    private static String CVSEXT  = ".cvs";
     private static String HTMLEXT = ".html";
-    private static String TXTEXT = ".txt";
-    private static String XLSEXT = ".xls";
-    private static String PDFEXT = ".pdf";
+    private static String TXTEXT  = ".txt";
+    private static String XLSEXT  = ".xls";
+    private static String PDFEXT  = ".pdf";
     
     private static String CVSSEP = ",";
     private static String TXTSEP = "|";
@@ -528,6 +528,10 @@ public class Exportador {
                     }
                 }
                 idxcelda = 0;
+            }
+            
+            for(int j = 0; j < modelo.getColumnCount(); j++){
+                hoja.autoSizeColumn(j);
             }
             
             

@@ -41,6 +41,8 @@ public class T3BTabla extends javax.swing.JPanel {
     private DefaultTableModel modeloFiltro = null;
     private boolean puedeExportar = true;
     private ArrayList<ColumnaDTO> otrasCols = null;
+    
+    private ArrayList<Object> paramsSP = null;
 
     /**
      * Constructor para la tabla
@@ -92,6 +94,65 @@ public class T3BTabla extends javax.swing.JPanel {
         this.cnf = cnf;
         this.cnf2 = null;
         this.puedeExportar = puedeExportar;
+        initComponents();
+        cargaComboTipoExport();
+        this.txtFiltro.setText("");
+        realizaConsulta();
+    }
+    
+    /**
+     * Constructor para la tabla
+     * @param qry consulta que se ejecutara y mostrara en la tabla (SELECT o un SP que regrese un ResultSet)
+     * @param cols Array list con el texto para las columnas de las tablas en el siguiente formato:
+     *              textoColumna_tamannioColumna
+     *              nombre(alias)campo_textoColumna_tamannioColumna_tipocolumna
+     *              ejemplo "usrnombre_Nombre_150_i" (i para entero, s para cadena, d para double, f para floats, h para fechas, y para numero sin formato)
+     * @param cnf DTO con las variables de configuracion para el acceso a la base de datos
+     *              "dbHost" - host de la base de datos
+     *              "dbUser" - usuario para la conexion 
+     *              "dbPass" - Contraseña del usuario
+     *              "dbPort" - Puerto de conexion
+     *              "dbName" - Nombre de la base de datos o service name de la base
+     *              "dbClassDriver" - Driver de la base de datos que se utilizara (Soportado actualmente MySQL y SyBASE)
+     *              "dbUrl" - URL de conexion (primera parte, antes del host) de acuerdo al driver utilizado (Soportado actualmente MySQL y SyBASE)
+     */
+    public T3BTabla(String qry, ArrayList<String> cols, t3bmodtabla.utils.Config cnf, boolean puedeExportar, ArrayList<Object> paramsSP){
+        this.qry = qry;
+        this.cols = cols;
+        this.cnf = cnf;
+        this.cnf2 = null;
+        this.puedeExportar = puedeExportar;
+        this.paramsSP = paramsSP;
+        initComponents();
+        cargaComboTipoExport();
+        this.txtFiltro.setText("");
+        realizaConsulta();
+    }
+    
+    
+    /**
+     * Constructor para la tabla
+     * @param qry consulta que se ejecutara y mostrara en la tabla (SELECT o un SP que regrese un ResultSet)
+     * @param cols Array list con el texto para las columnas de las tablas en el siguiente formato:
+     *              textoColumna_tamannioColumna
+     *              nombre(alias)campo_textoColumna_tamannioColumna_tipocolumna
+     *              ejemplo "usrnombre_Nombre_150_i" (i para entero, s para cadena, d para double, f para floats, h para fechas, y para numero sin formato)
+     * @param cnf DTO con las variables de configuracion para el acceso a la base de datos
+     *              "dbHost" - host de la base de datos
+     *              "dbUser" - usuario para la conexion 
+     *              "dbPass" - Contraseña del usuario
+     *              "dbPort" - Puerto de conexion
+     *              "dbName" - Nombre de la base de datos o service name de la base
+     *              "dbClassDriver" - Driver de la base de datos que se utilizara (Soportado actualmente MySQL y SyBASE)
+     *              "dbUrl" - URL de conexion (primera parte, antes del host) de acuerdo al driver utilizado (Soportado actualmente MySQL y SyBASE)
+     */
+    public T3BTabla(String qry, ArrayList<String> cols, HashMap<String, String> cnf, boolean puedeExportar, ArrayList<Object> paramsSP){
+        this.qry = qry;
+        this.cols = cols;
+        this.cnf = null;
+        this.cnf2 = cnf;
+        this.puedeExportar = puedeExportar;
+        this.paramsSP = paramsSP;
         initComponents();
         cargaComboTipoExport();
         this.txtFiltro.setText("");
@@ -200,7 +261,10 @@ public class T3BTabla extends javax.swing.JPanel {
         }
     }
     
-    
+    /**
+     * 
+     * @param columnas 
+     */
     private void cargaColumnas(final ArrayList<ColumnaDTO> columnas){
         try{
             this.otrasCols = columnas;
@@ -275,7 +339,11 @@ public class T3BTabla extends javax.swing.JPanel {
             this.creaConexion();
             this.con = this.conex.getConexion();
             Consulta dao = new Consulta();
-            QryRespDTO dto = dao.consulta(con, qry);
+            QryRespDTO dto = null;
+            if(this.paramsSP != null)
+                dto = dao.ejecutaSelectSP(con, qry, paramsSP);
+            else
+                dto = dao.consulta(con, qry);
             if(dto.getRes() == 1){
                 if(this.cols != null){
                     this.cargaColumnas();
